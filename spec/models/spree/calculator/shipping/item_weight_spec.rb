@@ -11,32 +11,44 @@ module Spree
                   preferred_default_weight: 1 }
 
       let(:calculator) { Calculator::Shipping::ItemWeight.new(options) }
+      let(:inventory_unit) { Struct.new(:line_item, :variant) }
 
       let(:variant1) { double("Variant", calculator_weight: 5,
-                                         width: 1,
-                                         depth: 1,
-                                         height: 1,
-                                         price: 4) }
+                              width: 1,
+                              depth: 1,
+                              height: 1,
+                              price: 4) }
       let(:variant2) { double("Variant", calculator_weight: 10,
-                                         width: 1,
-                                         depth: 1,
-                                         height: 1,
-                                         price: 6) }
+                              width: 1,
+                              depth: 1,
+                              height: 1,
+                              price: 6) }
       let(:variant3) { double("Variant",  calculator_weight: 0.0,
-                                          width: 1,
-                                          depth: 1,
-                                          height: 1,
-                                          price: 10) }
+                              width: 1,
+                              depth: 1,
+                              height: 1,
+                              price: 10) }
 
       let(:package) { double(Stock::Package,
                              order: mock_model(Order),
-                             contents: [Stock::Package::ContentItem.new(1,variant1, 4),
-                                        Stock::Package::ContentItem.new(2,variant2, 6)]) }
+                             contents: [
+                               Stock::ContentItem.new(inventory_unit.new(1, variant1)),
+                               Stock::ContentItem.new(inventory_unit.new(1, variant1)),
+                               Stock::ContentItem.new(inventory_unit.new(1, variant1)),
+                               Stock::ContentItem.new(inventory_unit.new(1, variant1)),
+                               Stock::ContentItem.new(inventory_unit.new(2, variant2)),
+                               Stock::ContentItem.new(inventory_unit.new(2, variant2)),
+                               Stock::ContentItem.new(inventory_unit.new(2, variant2)),
+                               Stock::ContentItem.new(inventory_unit.new(2, variant2)),
+                               Stock::ContentItem.new(inventory_unit.new(2, variant2)),
+                               Stock::ContentItem.new(inventory_unit.new(2, variant2))
+                             ]) }
 
       let(:package2) { double(Stock::Package,
                               order: mock_model(Order),
-                              contents: [Stock::Package::ContentItem.new(1,variant3,1)]
-        )}
+                              contents: [
+                                Stock::ContentItem.new(inventory_unit.new(1, variant3))
+                              ])}
 
       it "correctly select the default weight shipping price when no weight on the variant", :focus => true do
         calculator.available?(package2).should == true
